@@ -5,7 +5,7 @@ using UnityEngine;
 public class Block : MonoBehaviour {
 
     float fallTimer = 0; //countdown timer for fall speed
-    public float fallSpeed = 1;
+    private float fallSpeed;
 
     public bool allowRotation = true;
     public bool limitRotation = false;
@@ -20,7 +20,8 @@ public class Block : MonoBehaviour {
 
     private float verticalTimer = 0;
     private float horizontalTimer = 0;
-    private float buttonDownWaitTimer = 0;
+    private float buttonDownWaitTimerHorizontal = 0;
+    private float buttonDownWaitTimerVertical = 0;
 
     private bool movedImmediateHorizontal = false;
     private bool movedImmediateVertical = false;
@@ -31,8 +32,11 @@ public class Block : MonoBehaviour {
     private float individualScoreTime;
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+    {
         audioSource = GetComponent<AudioSource>();
+
+        fallSpeed = GameObject.Find("GameScript").GetComponent<Game>().fallSpeed;
 	}
 	
 	// Update is called once per frame
@@ -57,24 +61,86 @@ public class Block : MonoBehaviour {
 
     void CheckUserInput ()
     {
-        if (Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.LeftArrow) || Input.GetKeyUp(KeyCode.DownArrow))
+        if (Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.LeftArrow))
         {
             movedImmediateHorizontal = false;
-            movedImmediateVertical = false;
-
-            horizontalTimer = 0;
-            verticalTimer = 0;
-            buttonDownWaitTimer = 0;
+            horizontalTimer = 0;          
+            buttonDownWaitTimerHorizontal = 0;
         }
 
-        #region RightArrow movement
+        if(Input.GetKeyUp(KeyCode.DownArrow))
+        {
+            movedImmediateVertical = false;
+            verticalTimer = 0;
+            buttonDownWaitTimerVertical = 0;
+        }
+
         if (Input.GetKey(KeyCode.RightArrow))
         {
-            if(movedImmediateHorizontal)
+            MoveRight();
+        }
+
+        if (Input.GetKey(KeyCode.LeftArrow))
+        {
+            MoveLeft();
+        }
+
+        if (Input.GetKeyDown(KeyCode.UpArrow))
+        {
+            Rotate();
+        }
+
+        if (Input.GetKey(KeyCode.DownArrow) || Time.time - fallTimer >= fallSpeed) // moving the block rather by user or by timer
+        {
+            MoveDown();
+        }
+ 
+    }
+
+    void MoveLeft ()
+    {
+        if (movedImmediateHorizontal)
+        {
+            if (buttonDownWaitTimerHorizontal < buttonDownWaitMax)
             {
-                if (buttonDownWaitTimer < buttonDownWaitMax)
+                buttonDownWaitTimerHorizontal += Time.deltaTime;
+                return;
+            }
+
+            if (horizontalTimer < continuousHorizontalSpeed)
+            {
+                horizontalTimer += Time.deltaTime;
+                return; //return out of the method
+            }
+        }
+
+        if (!movedImmediateHorizontal)
+        {
+            movedImmediateHorizontal = true;
+        }
+
+        horizontalTimer = 0;
+
+        transform.position += new Vector3(-1, 0, 0);
+
+        if (CheckIsValidPosition())
+        {
+            FindObjectOfType<Game>().UpdateGrid(this);
+            PlayMoveAudio();
+        }
+        else
+        {
+            transform.position += new Vector3(1, 0, 0);
+        }
+    }
+
+    void MoveRight()
+    {
+            if (movedImmediateHorizontal)
+            {
+                if (buttonDownWaitTimerHorizontal < buttonDownWaitMax)
                 {
-                    buttonDownWaitTimer += Time.deltaTime;
+                    buttonDownWaitTimerHorizontal += Time.deltaTime;
                     return;
                 }
 
@@ -92,7 +158,7 @@ public class Block : MonoBehaviour {
 
             horizontalTimer = 0;
 
-            transform.position += new Vector3(1,0,0);
+            transform.position += new Vector3(1, 0, 0);
 
             if (CheckIsValidPosition())
             {
@@ -105,155 +171,109 @@ public class Block : MonoBehaviour {
             }
         }
 
-        #endregion
+    void MoveDown()
+    {
+    if (movedImmediateVertical)
+    {
 
-        #region LeftArrow movement
-        else if (Input.GetKey(KeyCode.LeftArrow))
+        if (buttonDownWaitTimerVertical < buttonDownWaitMax)
         {
-            if (movedImmediateHorizontal)
+            buttonDownWaitTimerVertical += Time.deltaTime;
+            return;
+        }
+
+        if (verticalTimer < continuousVerticalSpeed)
+        {
+            verticalTimer += Time.deltaTime;
+            return;
+        }
+    }
+
+    if (!movedImmediateVertical)
+    {
+        movedImmediateVertical = true;
+    }
+
+    verticalTimer = 0;
+
+    transform.position += new Vector3(0, -1, 0);
+
+    if (CheckIsValidPosition())
+    {
+        FindObjectOfType<Game>().UpdateGrid(this);
+        if (Input.GetKey(KeyCode.DownArrow))
+        {
+            PlayMoveAudio();
+        }
+    }
+    else
+    {
+        transform.position += new Vector3(0, 1, 0);
+
+        FindObjectOfType<Game>().DeleteRow();
+
+        if (FindObjectOfType<Game>().CheckIsAboveGrid(this))
+        {
+            FindObjectOfType<Game>().GameOver();
+        }
+
+        PlayLandAudio(); // plays land sound when the block landed
+        FindObjectOfType<Game>().SpawnNextBlock();
+
+        Game.currentScore += individualPoints;
+
+        enabled = false;
+        //GameObject.Destroy(this);
+
+    }
+
+    fallTimer = Time.time;
+}
+
+    void Rotate()
+    {
+    if (allowRotation)
+    {
+        if (limitRotation)
+        {
+            if (transform.rotation.eulerAngles.z >= 90)
             {
-                if (buttonDownWaitTimer < buttonDownWaitMax)
-                {
-                    buttonDownWaitTimer += Time.deltaTime;
-                    return;
-                }
-
-                if (horizontalTimer < continuousHorizontalSpeed)
-                {
-                    horizontalTimer += Time.deltaTime;
-                    return; //return out of the method
-                }
-            }
-
-            if(!movedImmediateHorizontal)
-            {
-                movedImmediateHorizontal = true;
-            }
-
-            horizontalTimer = 0;
-
-            transform.position += new Vector3(-1, 0, 0);
-
-            if (CheckIsValidPosition())
-            {
-                FindObjectOfType<Game>().UpdateGrid(this);
-                PlayMoveAudio();
+                transform.Rotate(0, 0, -90);
             }
             else
             {
-                transform.position += new Vector3(1, 0, 0);
+                transform.Rotate(0, 0, 90);
             }
         }
-        #endregion
-
-        #region UpArrow movement // The up movement of the block
-        else if (Input.GetKeyDown(KeyCode.UpArrow))
+        else
         {
-            if (allowRotation)
+            transform.Rotate(0, 0, 90);
+        }
+        if (CheckIsValidPosition())
+        {
+            FindObjectOfType<Game>().UpdateGrid(this);
+            PlayRotateAudio();
+        }
+        else
+        {
+            if (limitRotation)
             {
-                if (limitRotation)
+                if (transform.rotation.eulerAngles.z >= 90)
                 {
-                    if (transform.rotation.eulerAngles.z >= 90)
-                    {
-                        transform.Rotate(0, 0, -90);
-                    }
-                    else
-                    {
-                        transform.Rotate(0, 0, 90);
-                    }
+                    transform.Rotate(0, 0, -90);
                 }
                 else
                 {
                     transform.Rotate(0, 0, 90);
                 }
-                    if (CheckIsValidPosition())
-                    {
-                        FindObjectOfType<Game>().UpdateGrid(this);
-                    PlayRotateAudio();
-                    }
-                    else
-                    {
-                        if (limitRotation)
-                        {
-                            if (transform.rotation.eulerAngles.z >= 90)
-                            {
-                                transform.Rotate(0, 0, -90);
-                            }
-                            else
-                            {
-                                transform.Rotate(0, 0, 90);
-                            }
-                        }
-                        else
-                        {
-                            transform.Rotate(0, 0, -90);
-                        }
-                    }
-                }
-        }
-
-        #endregion
-
-        #region DownArrow movement // the down movement of the block
-        else if (Input.GetKey(KeyCode.DownArrow) || Time.time - fallTimer >= fallSpeed) // moving the block rather by user or by timer
-        {
-            if (movedImmediateVertical)
-            {
-
-                if (buttonDownWaitTimer < buttonDownWaitMax)
-                {
-                    buttonDownWaitTimer += Time.deltaTime;
-                    return;
-                }
-
-                if (verticalTimer < continuousVerticalSpeed)
-                {
-                    verticalTimer += Time.deltaTime;
-                    return;
-                }
-            }
-
-            if(!movedImmediateVertical)
-            {
-                movedImmediateVertical = true;
-            }
-
-            verticalTimer = 0;
-
-            transform.position += new Vector3(0, -1, 0);
-
-            if (CheckIsValidPosition())
-            {
-                FindObjectOfType<Game>().UpdateGrid(this);
-                if (Input.GetKey(KeyCode.DownArrow))
-                {
-                    PlayMoveAudio();
-                }
             }
             else
             {
-                transform.position += new Vector3(0, 1, 0);
-
-                FindObjectOfType<Game>().DeleteRow();
-
-                if(FindObjectOfType<Game>().CheckIsAboveGrid(this))
-                {
-                    FindObjectOfType<Game>().GameOver();
-                }
-
-                PlayLandAudio(); // plays land sound when the block landed
-                FindObjectOfType<Game>().SpawnNextBlock();
-
-                Game.currentScore += individualPoints;
-
-                enabled = false;
-
+                transform.Rotate(0, 0, -90);
             }
-
-            fallTimer = Time.time;
         }
-        #endregion
     }
+}
 
     void PlayMoveAudio()
     {
