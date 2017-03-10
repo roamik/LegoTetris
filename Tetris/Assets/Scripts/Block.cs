@@ -14,8 +14,8 @@ public class Block : MonoBehaviour {
     public AudioClip rotateSound;
     public AudioClip landSound;
 
-    private float continuousVerticalSpeed = 0.05f; // the speed at wich the block will move when the down button is held down
-    private float continuousHorizontalSpeed = 0.1f; // the speed at wich the block will move when the left or right buttons are held down
+    private float continuousVerticalSpeed = 0.25f; // the speed at wich the block will move when the down button is held down
+    private float continuousHorizontalSpeed = 0.8f; // the speed at wich the block will move when the left or right buttons are held down
     private float buttonDownWaitMax = 0.2f;         // how long to wait before the block recognizes that a button is being held down
 
     private float verticalTimer = 0;
@@ -31,19 +31,32 @@ public class Block : MonoBehaviour {
     private AudioSource audioSource;
     private float individualScoreTime;
 
-	// Use this for initialization
-	void Start ()
+    //Variables for touch movement
+    private float touchSensitivityHorizontal = 0.5f;
+    private float touchSensitivityVertical = 1f;
+
+    Vector2 previousUnitPos = Vector2.zero; //just for initialisation
+    Vector2 direction = Vector2.zero;
+
+    bool moved = false;
+
+    // Use this for initialization
+    void Start ()
     {
         audioSource = GetComponent<AudioSource>();
-
-        fallSpeed = GameObject.Find("GameScript").GetComponent<Game>().fallSpeed;
 	}
 	
 	// Update is called once per frame
 	void Update () {
         CheckUserInput();
         UpdateIndividualScore();
+        UpdateFallSpeed();
 	}
+
+    void UpdateFallSpeed()
+    {
+        fallSpeed = Game.fallSpeed;
+    }
 
     void UpdateIndividualScore()
     {
@@ -59,8 +72,53 @@ public class Block : MonoBehaviour {
         }
     }
 
-    void CheckUserInput ()
+   void CheckUserInput ()
     {
+        if (Input.touchCount > 0)
+        {
+            Touch t = Input.GetTouch(0);
+
+            if (t.phase == TouchPhase.Began)
+            {
+                previousUnitPos = new Vector2(t.position.x, t.position.y);
+            }
+            else if (t.phase == TouchPhase.Moved)
+            {
+                Vector2 touchDeltaPosition = t.deltaPosition;
+                direction = touchDeltaPosition.normalized;
+
+                if (Mathf.Abs(t.position.x - previousUnitPos.x) >= touchSensitivityHorizontal && direction.x < 0 && t.deltaPosition.y > -20 && t.deltaPosition.y < 20)
+                {
+                    //move left
+                    MoveLeft();
+                    previousUnitPos = t.position;
+                    moved = true;
+                }
+                else if (Mathf.Abs(t.position.x - previousUnitPos.x) >= touchSensitivityHorizontal && direction.x > 0 && t.deltaPosition.y > -20 && t.deltaPosition.y < 20)
+                {
+                    //move right
+                    MoveRight();
+                    previousUnitPos = t.position;
+                    moved = true;
+                }
+                else if (Mathf.Abs(t.position.y - previousUnitPos.y) >= touchSensitivityVertical && direction.y < 0 && t.deltaPosition.x > -20 && t.deltaPosition.x < 20)
+                {
+                    //move down
+                    MoveDown();
+                    previousUnitPos = t.position;
+                    moved = true;
+                }
+            }
+            else if (t.phase == TouchPhase.Ended)
+            {
+                if (!moved && t.position.x > Screen.width / 4)
+                {
+                    Rotate();
+                }
+                moved = false;
+            }
+        }
+
         if (Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.LeftArrow))
         {
             movedImmediateHorizontal = false;

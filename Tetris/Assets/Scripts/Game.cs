@@ -12,6 +12,10 @@ public class Game : MonoBehaviour {
 
     public static Transform[,] grid = new Transform[gridWidth, gridHeight];
 
+    public static bool startingAtLevelZero;
+
+    public static int startingLevel;
+
     public int scoreOneLine = 35;
     public int scoreTwoLine = 75;
     public int scoreThreeLine = 125;
@@ -20,7 +24,7 @@ public class Game : MonoBehaviour {
     public int currentLevel = 0;
     private int numOfLinesCleared = 0;
 
-    public float fallSpeed = 1.0f;
+    public static float fallSpeed = 1.0f;
 
     public AudioClip clearedLineSound;
 
@@ -40,11 +44,15 @@ public class Game : MonoBehaviour {
     private bool gameStarted = false;
 
     private Vector2 spawnNextBlock = new Vector2(5.0f, 20.0f);
-    private Vector2 previewBlockPosition = new Vector2(-5f, 16f);
+    private Vector2 previewBlockPosition = new Vector2(-4f, 16f);
 
 
 	// Use this for initialization
-	void Start () {
+	void Start ()
+    {
+        currentLevel = startingLevel;
+        currentScore = 0;
+
         SpawnNextBlock();
 
         audioSource = GetComponent<AudioSource>();
@@ -60,7 +68,10 @@ public class Game : MonoBehaviour {
 
     void UpdateLevel()
     {
-        currentLevel = numOfLinesCleared / 10; // currentlevel is at 0 (0 lines cleared) , 0 / 10 = 0 (integers) , 10/10 = 1 it means that current level will be 1, etc (20/10 = 2 , current level = 2)
+        if ((startingAtLevelZero == true) || (startingAtLevelZero == false && numOfLinesCleared / 10 > startingLevel))
+        {
+            currentLevel = numOfLinesCleared / 10; // currentlevel is at 0 (0 lines cleared) , 0 / 10 = 0 (integers) , 10/10 = 1 it means that current level will be 1, etc (20/10 = 2 , current level = 2)
+        }
     }
 
     void UpdateSpeed()
@@ -104,25 +115,25 @@ public class Game : MonoBehaviour {
 
     public void ClearedOneLine()
     {
-        currentScore += scoreOneLine + (currentLevel * 15);
+        currentScore += scoreOneLine;
         numOfLinesCleared++;
     }
 
     public void ClearedTwoLines()
     {
-        currentScore += scoreTwoLine + (currentLevel * 20);
+        currentScore += scoreTwoLine;
         numOfLinesCleared += 2;
     }
 
     public void ClearedThreeLines()
     {
-        currentScore += scoreThreeLine + (currentLevel * 25);
+        currentScore += scoreThreeLine;
         numOfLinesCleared += 3;
     }
 
     public void ClearedFourLines()
     {
-        currentScore += scoreFourLine + (currentLevel * 30);
+        currentScore += scoreFourLine;
         numOfLinesCleared += 4;
     }
 
