@@ -14,8 +14,8 @@ public class Block : MonoBehaviour {
     public AudioClip rotateSound;
     public AudioClip landSound;
 
-    private float continuousVerticalSpeed = 0.25f; // the speed at wich the block will move when the down button is held down
-    private float continuousHorizontalSpeed = 0.8f; // the speed at wich the block will move when the left or right buttons are held down
+    private float continuousVerticalSpeed = 0.15f; // the speed at wich the block will move when the down button is held down
+    private float continuousHorizontalSpeed = 0.55f; // the speed at wich the block will move when the left or right buttons are held down
     private float buttonDownWaitMax = 0.2f;         // how long to wait before the block recognizes that a button is being held down
 
     private float verticalTimer = 0;
@@ -32,7 +32,7 @@ public class Block : MonoBehaviour {
     private float individualScoreTime;
 
     //Variables for touch movement
-    private float touchSensitivityHorizontal = 0.5f;
+    private float touchSensitivityHorizontal = 0f;
     private float touchSensitivityVertical = 1f;
 
     Vector2 previousUnitPos = Vector2.zero; //just for initialisation
@@ -87,21 +87,21 @@ public class Block : MonoBehaviour {
                 Vector2 touchDeltaPosition = t.deltaPosition;
                 direction = touchDeltaPosition.normalized;
 
-                if (Mathf.Abs(t.position.x - previousUnitPos.x) >= touchSensitivityHorizontal && direction.x < 0 && t.deltaPosition.y > -20 && t.deltaPosition.y < 20)
+                if (Mathf.Abs(t.position.x - previousUnitPos.x) >= touchSensitivityHorizontal && direction.x < 0 && t.deltaPosition.y > -10 && t.deltaPosition.y < 10)
                 {
                     //move left
                     MoveLeft();
                     previousUnitPos = t.position;
                     moved = true;
                 }
-                else if (Mathf.Abs(t.position.x - previousUnitPos.x) >= touchSensitivityHorizontal && direction.x > 0 && t.deltaPosition.y > -20 && t.deltaPosition.y < 20)
+                else if (Mathf.Abs(t.position.x - previousUnitPos.x) >= touchSensitivityHorizontal && direction.x > 0 && t.deltaPosition.y > -10 && t.deltaPosition.y < 10)
                 {
                     //move right
                     MoveRight();
                     previousUnitPos = t.position;
                     moved = true;
                 }
-                else if (Mathf.Abs(t.position.y - previousUnitPos.y) >= touchSensitivityVertical && direction.y < 0 && t.deltaPosition.x > -20 && t.deltaPosition.x < 20)
+                else if (Mathf.Abs(t.position.y - previousUnitPos.y) >= touchSensitivityVertical && direction.y < 0 && t.deltaPosition.x > -10 && t.deltaPosition.x < 10)
                 {
                     //move down
                     MoveDown();
@@ -280,8 +280,7 @@ public class Block : MonoBehaviour {
 
         Game.currentScore += individualPoints;
 
-        enabled = false;
-        //GameObject.Destroy(this);
+        enabled = false;       
 
     }
 

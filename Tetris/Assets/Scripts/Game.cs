@@ -218,7 +218,6 @@ public class Game : MonoBehaviour {
             if (IsFullRow(y))
             {
                 DeleteMinoAt(y);
-
                 MoveAllRowsDown(y + 1);
 
                 --y;
