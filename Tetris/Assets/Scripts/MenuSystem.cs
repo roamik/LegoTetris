@@ -20,15 +20,21 @@ public class MenuSystem : MonoBehaviour
     //int activeScreenResIndex;
 
     public Text levelText;
+    public Text highScoreText;
+    public Text highScoreText2;
+    public Text highScoreText3;
 
     void Start()
     {
        levelText.text = "0";
+        highScoreText.text = PlayerPrefs.GetInt("highscore").ToString();
+        highScoreText2.text = PlayerPrefs.GetInt("highscore2").ToString();
+        highScoreText3.text = PlayerPrefs.GetInt("highscore3").ToString();
     }
 
     public void RetryButton()
     {
-        SceneManager.LoadScene("LevelMain");
+        SceneManager.LoadScene("MainMenu");
     }
 
     public void StartButton()

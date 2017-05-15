@@ -118,6 +118,14 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: ac1d40c2acbbdd74ba34085f45c6f82e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  mainMenuHolder: {fileID: 0}
+  optionsMenuHolder: {fileID: 0}
+  volumeSlider: {fileID: 0}
+  volume: 0
+  levelText: {fileID: 0}
+  highScoreText: {fileID: 0}
+  highScoreText2: {fileID: 0}
+  highScoreText3: {fileID: 0}
 --- !u!4 &66799133
 Transform:
   m_ObjectHideFlags: 0

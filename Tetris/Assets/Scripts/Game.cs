@@ -41,6 +41,10 @@ public class Game : MonoBehaviour {
     private GameObject previewBlock;
     private GameObject nextBlock;
 
+    private int startingHighScore;
+    private int startingHighScore2;
+    private int startingHighScore3;
+
     private bool gameStarted = false;
 
     private Vector2 spawnNextBlock = new Vector2(5.0f, 20.0f);
@@ -50,13 +54,24 @@ public class Game : MonoBehaviour {
 	// Use this for initialization
 	void Start ()
     {
-        currentLevel = startingLevel;
         currentScore = 0;
+
+        hud_score.text = "0";
+
+        currentLevel = startingLevel;
+
+        hud_level.text = currentLevel.ToString();
+
+        hud_lines.text = "0";
 
         SpawnNextBlock();
 
         audioSource = GetComponent<AudioSource>();
-	}
+
+        startingHighScore = PlayerPrefs.GetInt("highscore");
+        startingHighScore2 = PlayerPrefs.GetInt("highscore2");
+        startingHighScore3 = PlayerPrefs.GetInt("highscore3");
+    }
 
     void Update()
     {
@@ -140,6 +155,29 @@ public class Game : MonoBehaviour {
     public void PlayLineClearedSound()
     {
         audioSource.PlayOneShot(clearedLineSound);
+    }
+
+    public void UpdateHighScore()
+    {
+
+        if(currentScore > startingHighScore)
+        {
+            PlayerPrefs.SetInt("highscore3", startingHighScore2);
+
+            PlayerPrefs.SetInt("highscore2", startingHighScore);
+
+            PlayerPrefs.SetInt("highscore", currentScore);
+        }
+        else if (currentScore > startingHighScore2)
+        {
+            PlayerPrefs.SetInt("highscore3", startingHighScore2);
+
+            PlayerPrefs.SetInt("highscore2", currentScore);
+        }
+        else if (currentScore > startingHighScore3)
+        {
+            PlayerPrefs.SetInt("highscore3", currentScore);
+        }
     }
 
     public bool CheckIsAboveGrid(Block block)
@@ -328,6 +366,7 @@ public class Game : MonoBehaviour {
 
     public void GameOver()
     {
+        UpdateHighScore();
         SceneManager.LoadScene("GameOver");
     }
 }

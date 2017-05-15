@@ -122,11 +122,12 @@ public class Block : MonoBehaviour {
         if (Input.GetKeyUp(KeyCode.RightArrow) || Input.GetKeyUp(KeyCode.LeftArrow))
         {
             movedImmediateHorizontal = false;
-            horizontalTimer = 0;          
+            horizontalTimer = 0;
             buttonDownWaitTimerHorizontal = 0;
         }
 
-        if(Input.GetKeyUp(KeyCode.DownArrow))
+        if (Input.GetKeyUp(KeyCode.DownArrow))
+        //if(Input.GetAxis("Vertical") < 0)
         {
             movedImmediateVertical = false;
             verticalTimer = 0;
@@ -134,21 +135,25 @@ public class Block : MonoBehaviour {
         }
 
         if (Input.GetKey(KeyCode.RightArrow))
+        //if (Input.GetAxis("Horizontal") > 0)
         {
             MoveRight();
         }
 
         if (Input.GetKey(KeyCode.LeftArrow))
+        //if (Input.GetAxis("Horizontal") < 0)
         {
             MoveLeft();
         }
 
         if (Input.GetKeyDown(KeyCode.UpArrow))
+        //if (Input.GetAxis("Vertical") > 0)
         {
             Rotate();
         }
 
         if (Input.GetKey(KeyCode.DownArrow) || Time.time - fallTimer >= fallSpeed) // moving the block rather by user or by timer
+        //if (Input.GetAxis("Vertical") < 0 || Time.time - fallTimer >= fallSpeed)
         {
             MoveDown();
         }
